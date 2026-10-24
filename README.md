@@ -1,1 +1,0 @@
-# data_analyst_project_student_result_management_system
