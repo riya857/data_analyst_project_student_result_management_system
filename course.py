@@ -1,0 +1,1033 @@
+from tkinter import *
+from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
+from time import strftime
+import math
+import os
+import sys
+import mysql.connector
+from mysql.connector import Error
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="user",
+            database="student_result_management"
+        )
+        return connection
+    except mysql.connector.Error as err:
+        messagebox.showerror(
+            "Database Connection Error",
+            f"Error connecting to the database: {err}"
+        )
+        sys.exit(1)
+def open_course(self):
+    from course import Courseclass
+    self.new_window = Toplevel(self.root)
+    self.new_obj=Courseclass(self.new_window)
+    def open_student(self):
+        from student import Studentclass
+        self.new_window = Toplevel(self.root)
+        self.new_obj=Studentclass(self.new_window)
+        def open_result(self):
+            from result import Resultclass
+            self.new_window = Toplevel(self.root)
+            self.new_obj=Resultclass(self.new_window)
+            def open_view_result(self):
+                from view_result import ViewResultclass
+                self.new_window = Toplevel(self.root)
+                self.new_obj=ViewResultclass(self.new_window)
+                def logout(self):
+                    self.root.destroy()
+class RMS:
+
+    def __init__(self, root):
+
+        self.root = root
+        self.root.title("Student Result Management System")
+        self.root.geometry("1350x700+0+0")
+        self.root.config(bg="white")
+
+        # ==================================================
+        # HEADER
+        # ==================================================
+
+        title = Label(
+            self.root,
+            text="Student Result Management System",
+            font=("goudy old style", 28, "bold"),
+            bg="#033054",
+            fg="white"
+        )
+        title.place(x=0, y=0, relwidth=1, height=60)
+
+        # ==================================================
+        # MENU
+        # ==================================================
+
+        menu_frame = LabelFrame(
+            self.root,
+            text="Menus",
+            font=("times new roman", 14),
+            bg="white",
+            bd=2,
+            relief=GROOVE
+        )
+
+        menu_frame.place(
+            x=35,
+            y=65,
+            width=1280,
+            height=70
+        )
+
+        # ==================================================
+        # COURSE BUTTON
+        # ==================================================
+
+        Button(
+            menu_frame,
+            text="Course",
+            font=("goudy old style", 15, "bold"),
+            bg="#0b5377",
+            fg="white",
+            cursor="hand2",
+            command=self.course_window
+        ).place(
+            x=15,
+            y=5,
+            width=155,
+            height=40
+        )
+
+        # ==================================================
+        # STUDENT BUTTON
+        # ==================================================
+
+        Button(
+            menu_frame,
+            text="Student",
+            font=("goudy old style", 15, "bold"),
+            bg="#0b5377",
+            fg="white",
+            cursor="hand2"
+        ).place(
+            x=185,
+            y=5,
+            width=155,
+            height=40
+        )
+
+        # ==================================================
+        # RESULT BUTTON
+        # ==================================================
+
+        Button(
+            menu_frame,
+            text="Result",
+            font=("goudy old style", 15, "bold"),
+            bg="#0b5377",
+            fg="white",
+            cursor="hand2"
+        ).place(
+            x=355,
+            y=5,
+            width=155,
+            height=40
+        )
+
+        # ==================================================
+        # VIEW RESULT
+        # ==================================================
+
+        Button(
+            menu_frame,
+            text="View Student Result",
+            font=("goudy old style", 15, "bold"),
+            bg="#0b5377",
+            fg="white",
+            cursor="hand2"
+        ).place(
+            x=525,
+            y=5,
+            width=190,
+            height=40
+        )
+
+        # ==================================================
+        # LOGOUT
+        # ==================================================
+
+        Button(
+            menu_frame,
+            text="Logout",
+            font=("goudy old style", 15, "bold"),
+            bg="#0b5377",
+            fg="white",
+            cursor="hand2"
+        ).place(
+            x=730,
+            y=5,
+            width=155,
+            height=40
+        )
+
+        # ==================================================
+        # EXIT
+        # ==================================================
+
+        Button(
+            menu_frame,
+            text="Exit",
+            font=("goudy old style", 15, "bold"),
+            bg="#0b5377",
+            fg="white",
+            cursor="hand2",
+            command=self.root.destroy
+        ).place(
+            x=900,
+            y=5,
+            width=155,
+            height=40
+        )
+
+        # ==================================================
+        # ANALOG CLOCK
+        # ==================================================
+
+        clock_frame = Frame(
+            self.root,
+            bg="#06212d",
+            bd=2,
+            relief=RAISED
+        )
+
+        clock_frame.place(
+            x=35,
+            y=150,
+            width=270,
+            height=330
+        )
+
+        Label(
+            clock_frame,
+            text="Analog Clock",
+            font=("goudy old style", 24, "bold"),
+            bg="#06212d",
+            fg="white"
+        ).pack(pady=10)
+
+        self.clock_canvas = Canvas(
+            clock_frame,
+            width=240,
+            height=240,
+            bg="#06212d",
+            highlightthickness=0
+        )
+
+        self.clock_canvas.pack()
+
+        self.update_clock()
+
+        # ==================================================
+        # CENTER IMAGE
+        # ==================================================
+
+        image_frame = Frame(
+            self.root,
+            bg="#eaf7fb",
+            bd=2,
+            relief=RAISED
+        )
+
+        image_frame.place(
+            x=320,
+            y=150,
+            width=730,
+            height=330
+        )
+
+        # Image search
+        image_files = [
+            "images/images.jpg",
+            "images/bg.png",
+            "images/student.png",
+            "images/result.jpg",
+            "images/bg.jpg"
+        ]
+
+        selected_image = None
+
+        for file in image_files:
+            if os.path.exists(file):
+                selected_image = file
+                break
+
+        # Show image
+        if selected_image:
+
+            try:
+
+                img = Image.open(selected_image)
+
+                img = img.resize(
+                    (726, 326),
+                    Image.Resampling.LANCZOS
+                )
+
+                self.main_photo = ImageTk.PhotoImage(img)
+
+                photo_label = Label(
+                    image_frame,
+                    image=self.main_photo,
+                    bg="white"
+                )
+
+                photo_label.place(
+                    x=0,
+                    y=0,
+                    width=726,
+                    height=326
+                )
+
+            except Exception:
+                self.show_default_image(image_frame)
+
+        else:
+            self.show_default_image(image_frame)
+
+        # ==================================================
+        # TOTAL STUDENTS
+        # ==================================================
+
+        student_box = Frame(
+            self.root,
+            bg="#f4510b",
+            bd=2,
+            relief=RAISED
+        )
+
+        student_box.place(
+            x=35,
+            y=490,
+            width=400,
+            height=85
+        )
+
+        Label(
+            student_box,
+            text="Total Students",
+            font=("goudy old style", 20, "bold"),
+            bg="#f4510b",
+            fg="white"
+        ).pack(pady=3)
+
+        Label(
+            student_box,
+            text="[ 3 ]",
+            font=("goudy old style", 18, "bold"),
+            bg="#f4510b",
+            fg="white"
+        ).pack()
+
+        # ==================================================
+        # TOTAL COURSE
+        # ==================================================
+
+        course_box = Frame(
+            self.root,
+            bg="#1682b5",
+            bd=2,
+            relief=RAISED
+        )
+
+        course_box.place(
+            x=450,
+            y=490,
+            width=400,
+            height=85
+        )
+
+        Label(
+            course_box,
+            text="Total Course",
+            font=("goudy old style", 20, "bold"),
+            bg="#1682b5",
+            fg="white"
+        ).pack(pady=3)
+
+        Label(
+            course_box,
+            text="[ 3 ]",
+            font=("goudy old style", 18, "bold"),
+            bg="#1682b5",
+            fg="white"
+        ).pack()
+
+        # ==================================================
+        # TOTAL RESULTS
+        # ==================================================
+
+        result_box = Frame(
+            self.root,
+            bg="#0b8f87",
+            bd=2,
+            relief=RAISED
+        )
+
+        result_box.place(
+            x=865,
+            y=490,
+            width=400,
+            height=85
+        )
+
+        Label(
+            result_box,
+            text="Total Results",
+            font=("goudy old style", 20, "bold"),
+            bg="#0b8f87",
+            fg="white"
+        ).pack(pady=3)
+
+        Label(
+            result_box,
+            text="[ 3 ]",
+            font=("goudy old style", 18, "bold"),
+            bg="#0b8f87",
+            fg="white"
+        ).pack()
+
+        # ==================================================
+        # FOOTER
+        # ==================================================
+
+        footer = Label(
+            self.root,
+            text="Project Name: Student Result Management System",
+            font=("times new roman", 15, "bold"),
+            bg="#033054",
+            fg="white"
+        )
+
+        footer.place(
+            x=0,
+            y=640,
+            relwidth=1,
+            height=40
+        )
+
+    # ======================================================
+    # COURSE MANAGEMENT WINDOW
+    # ======================================================
+
+    def course_window(self):
+
+        self.course_win = Toplevel(self.root)
+
+        self.course_win.title("Course Management")
+        self.course_win.geometry("1000x550+180+100")
+        self.course_win.config(bg="white")
+
+        # ==================================================
+        # COURSE HEADER
+        # ==================================================
+
+        Label(
+            self.course_win,
+            text="Course Management",
+            font=("goudy old style", 25, "bold"),
+            bg="#033054",
+            fg="white"
+        ).pack(
+            fill=X,
+            pady=0
+        )
+
+        # ==================================================
+        # COURSE FORM
+        # ==================================================
+
+        form_frame = Frame(
+            self.course_win,
+            bg="white",
+            bd=2,
+            relief=GROOVE
+        )
+
+        form_frame.place(
+            x=20,
+            y=70,
+            width=350,
+            height=420
+        )
+
+        Label(
+            form_frame,
+            text="Course Details",
+            font=("goudy old style", 20, "bold"),
+            bg="white",
+            fg="#033054"
+        ).pack(pady=15)
+
+        # Course ID
+        Label(
+            form_frame,
+            text="Course ID",
+            font=("times new roman", 14, "bold"),
+            bg="white"
+        ).pack(anchor=W, padx=20)
+
+        self.course_id = Entry(
+            form_frame,
+            font=("times new roman", 14),
+            bd=2
+        )
+
+        self.course_id.pack(
+            padx=20,
+            pady=5,
+            fill=X
+        )
+
+        # Course Name
+        Label(
+            form_frame,
+            text="Course Name",
+            font=("times new roman", 14, "bold"),
+            bg="white"
+        ).pack(anchor=W, padx=20, pady=(10, 0))
+
+        self.course_name = Entry(
+            form_frame,
+            font=("times new roman", 14),
+            bd=2
+        )
+
+        self.course_name.pack(
+            padx=20,
+            pady=5,
+            fill=X
+        )
+
+        # Duration
+        Label(
+            form_frame,
+            text="Duration",
+            font=("times new roman", 14, "bold"),
+            bg="white"
+        ).pack(anchor=W, padx=20, pady=(10, 0))
+
+        self.course_duration = Entry(
+            form_frame,
+            font=("times new roman", 14),
+            bd=2
+        )
+
+        self.course_duration.pack(
+            padx=20,
+            pady=5,
+            fill=X
+        )
+
+        # ==================================================
+        # BUTTONS
+        # ==================================================
+
+        Button(
+            form_frame,
+            text="Add",
+            font=("times new roman", 13, "bold"),
+            bg="#0b5377",
+            fg="white",
+            cursor="hand2",
+            command=self.add_course
+        ).place(
+            x=20,
+            y=300,
+            width=80,
+            height=40
+        )
+
+        Button(
+            form_frame,
+            text="Update",
+            font=("times new roman", 13, "bold"),
+            bg="#1682b5",
+            fg="white",
+            cursor="hand2",
+            command=self.update_course
+        ).place(
+            x=110,
+            y=300,
+            width=90,
+            height=40
+        )
+
+        Button(
+            form_frame,
+            text="Delete",
+            font=("times new roman", 13, "bold"),
+            bg="#f4510b",
+            fg="white",
+            cursor="hand2",
+            command=self.delete_course
+        ).place(
+            x=210,
+            y=300,
+            width=90,
+            height=40
+        )
+
+        Button(
+            form_frame,
+            text="Clear",
+            font=("times new roman", 13, "bold"),
+            bg="#555555",
+            fg="white",
+            cursor="hand2",
+            command=self.clear_course
+        ).place(
+            x=110,
+            y=355,
+            width=90,
+            height=40
+        )
+
+        # ==================================================
+        # COURSE TABLE
+        # ==================================================
+
+        table_frame = Frame(
+            self.course_win,
+            bg="white",
+            bd=2,
+            relief=GROOVE
+        )
+
+        table_frame.place(
+            x=390,
+            y=70,
+            width=580,
+            height=420
+        )
+
+        Label(
+            table_frame,
+            text="Course List",
+            font=("goudy old style", 20, "bold"),
+            bg="white",
+            fg="#033054"
+        ).pack(pady=10)
+
+        # Treeview
+        columns = (
+            "Course ID",
+            "Course Name",
+            "Duration"
+        )
+
+        self.course_table = ttk.Treeview(
+            table_frame,
+            columns=columns,
+            show="headings"
+        )
+
+        self.course_table.heading(
+            "Course ID",
+            text="Course ID"
+        )
+
+        self.course_table.heading(
+            "Course Name",
+            text="Course Name"
+        )
+
+        self.course_table.heading(
+            "Duration",
+            text="Duration"
+        )
+
+        self.course_table.column(
+            "Course ID",
+            width=100
+        )
+
+        self.course_table.column(
+            "Course Name",
+            width=250
+        )
+
+        self.course_table.column(
+            "Duration",
+            width=150
+        )
+
+        self.course_table.pack(
+            fill=BOTH,
+            expand=True,
+            padx=10,
+            pady=10
+        )
+
+        # Select row
+        self.course_table.bind(
+            "<ButtonRelease-1>",
+            self.select_course
+        )
+
+        # ==================================================
+        # DEFAULT 3 COURSES
+        # ==================================================
+
+        self.course_table.insert(
+            "",
+            END,
+            values=("C01", "BCA", "3 Years")
+        )
+
+        self.course_table.insert(
+            "",
+            END,
+            values=("C02", "BBA", "3 Years")
+        )
+
+        self.course_table.insert(
+            "",
+            END,
+            values=("C03", "B.Com", "3 Years")
+        )
+
+    # ======================================================
+    # ADD COURSE
+    # ======================================================
+
+    def add_course(self):
+
+        course_id = self.course_id.get()
+        course_name = self.course_name.get()
+        duration = self.course_duration.get()
+
+        if course_id == "" or course_name == "" or duration == "":
+            messagebox.showerror(
+                "Error",
+                "Please fill all fields",
+                parent=self.course_win
+            )
+            return
+
+        self.course_table.insert(
+            "",
+            END,
+            values=(
+                course_id,
+                course_name,
+                duration
+            )
+        )
+
+        messagebox.showinfo(
+            "Success",
+            "Course added successfully",
+            parent=self.course_win
+        )
+
+        self.clear_course()
+
+    # ======================================================
+    # UPDATE COURSE
+    # ======================================================
+
+    def update_course(self):
+
+        selected = self.course_table.focus()
+
+        if selected == "":
+            messagebox.showerror(
+                "Error",
+                "Please select a course",
+                parent=self.course_win
+            )
+            return
+
+        values = (
+            self.course_id.get(),
+            self.course_name.get(),
+            self.course_duration.get()
+        )
+
+        if "" in values:
+            messagebox.showerror(
+                "Error",
+                "Please fill all fields",
+                parent=self.course_win
+            )
+            return
+
+        self.course_table.item(
+            selected,
+            values=values
+        )
+
+        messagebox.showinfo(
+            "Success",
+            "Course updated successfully",
+            parent=self.course_win
+        )
+
+        self.clear_course()
+
+    # ======================================================
+    # DELETE COURSE
+    # ======================================================
+
+    def delete_course(self):
+
+        selected = self.course_table.focus()
+
+        if selected == "":
+            messagebox.showerror(
+                "Error",
+                "Please select a course",
+                parent=self.course_win
+            )
+            return
+
+        answer = messagebox.askyesno(
+            "Delete",
+            "Are you sure you want to delete this course?",
+            parent=self.course_win
+        )
+
+        if answer:
+
+            self.course_table.delete(selected)
+
+            self.clear_course()
+
+            messagebox.showinfo(
+                "Success",
+                "Course deleted successfully",
+                parent=self.course_win
+            )
+
+    # ======================================================
+    # SELECT COURSE
+    # ======================================================
+
+    def select_course(self, event):
+
+        selected = self.course_table.focus()
+
+        if selected:
+
+            values = self.course_table.item(
+                selected,
+                "values"
+            )
+
+            if values:
+
+                self.course_id.delete(0, END)
+                self.course_id.insert(0, values[0])
+
+                self.course_name.delete(0, END)
+                self.course_name.insert(0, values[1])
+
+                self.course_duration.delete(0, END)
+                self.course_duration.insert(0, values[2])
+
+    # ======================================================
+    # CLEAR COURSE
+    # ======================================================
+
+    def clear_course(self):
+
+        self.course_id.delete(0, END)
+        self.course_name.delete(0, END)
+        self.course_duration.delete(0, END)
+
+    # ======================================================
+    # DEFAULT IMAGE
+    # ======================================================
+
+    def show_default_image(self, parent):
+
+        Label(
+            parent,
+            text="Student Result\nManagement System",
+            font=("goudy old style", 30, "bold"),
+            bg="#eaf7fb",
+            fg="#0b5377",
+            justify=CENTER
+        ).pack(
+            expand=True
+        )
+
+    # ======================================================
+    # ANALOG CLOCK
+    # ======================================================
+
+    def update_clock(self):
+
+        self.clock_canvas.delete("all")
+
+        cx = 120
+        cy = 115
+        radius = 90
+
+        # Outer circle
+        self.clock_canvas.create_oval(
+            cx - radius,
+            cy - radius,
+            cx + radius,
+            cy + radius,
+            outline="#173b4a",
+            width=5
+        )
+
+        # Inner circle
+        self.clock_canvas.create_oval(
+            cx - 80,
+            cy - 80,
+            cx + 80,
+            cy + 80,
+            outline="#102d3a",
+            width=2
+        )
+
+        # Tick marks
+        for i in range(60):
+
+            angle = math.radians(
+                i * 6 - 90
+            )
+
+            x1 = cx + 82 * math.cos(angle)
+            y1 = cy + 82 * math.sin(angle)
+
+            x2 = cx + 88 * math.cos(angle)
+            y2 = cy + 88 * math.sin(angle)
+
+            self.clock_canvas.create_line(
+                x1,
+                y1,
+                x2,
+                y2,
+                fill="#66808b",
+                width=2
+            )
+
+        # Numbers
+        for number in range(1, 13):
+
+            angle = math.radians(
+                number * 30 - 90
+            )
+
+            x = cx + 68 * math.cos(angle)
+            y = cy + 68 * math.sin(angle)
+
+            self.clock_canvas.create_text(
+                x,
+                y,
+                text=str(number),
+                font=("times new roman", 12, "bold"),
+                fill="white"
+            )
+
+        # Current time
+        hour = int(strftime("%H"))
+        minute = int(strftime("%M"))
+        second = int(strftime("%S"))
+
+        # Hour hand
+        hour_angle = math.radians(
+            ((hour % 12) * 30)
+            + (minute * 0.5)
+            - 90
+        )
+
+        hx = cx + 45 * math.cos(hour_angle)
+        hy = cy + 45 * math.sin(hour_angle)
+
+        self.clock_canvas.create_line(
+            cx,
+            cy,
+            hx,
+            hy,
+            fill="#ff3055",
+            width=5
+        )
+
+        # Minute hand
+        minute_angle = math.radians(
+            minute * 6 - 90
+        )
+
+        mx = cx + 62 * math.cos(minute_angle)
+        my = cy + 62 * math.sin(minute_angle)
+
+        self.clock_canvas.create_line(
+            cx,
+            cy,
+            mx,
+            my,
+            fill="white",
+            width=3
+        )
+
+        # Second hand
+        second_angle = math.radians(
+            second * 6 - 90
+        )
+
+        sx = cx + 70 * math.cos(second_angle)
+        sy = cy + 70 * math.sin(second_angle)
+
+        self.clock_canvas.create_line(
+            cx,
+            cy,
+            sx,
+            sy,
+            fill="#00ffff",
+            width=2
+        )
+
+        # Center
+        self.clock_canvas.create_oval(
+            cx - 5,
+            cy - 5,
+            cx + 5,
+            cy + 5,
+            fill="#00ffff",
+            outline="#00ffff"
+        )
+
+        # Digital time
+        self.clock_canvas.create_text(
+            cx,
+            210,
+            text=strftime("%I:%M:%S %p"),
+            font=("goudy old style", 14, "bold"),
+            fill="#00ffff"
+        )
+
+        self.root.after(
+            1000,
+            self.update_clock
+        )
+
+
+# ==========================================================
+# RUN PROGRAM
+# ==========================================================
+
+if __name__ == "__main__":
+
+    root = Tk()
+
+    obj = RMS(root)
+
+    root.mainloop()
